@@ -4,6 +4,7 @@ from models.base_model import BaseModel, Base
 from models.city import City
 from sqlalchemy import Column, String, ForeignKey
 import sqlalchemy
+import os
 
 
 class State(BaseModel, Base):
@@ -11,7 +12,7 @@ class State(BaseModel, Base):
     __tablename__ = 'states'
     name = Column(String(128), nullable=False)
 
-    if models.storage_type != "db":
+    if os.getenv('HBNB_TYPE_STORAGE') != 'db':
     @property
     def cities(self):
         """ getter attribute cities that returns
