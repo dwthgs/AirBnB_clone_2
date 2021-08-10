@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-"""mysql engine"""
+"""Module to create a mysql engine"""
 
 import os
 from models.base_model import BaseModel, Base
@@ -10,7 +10,8 @@ from models.amenity import Amenity
 from models.place import Place
 from models.review import Review
 from sqlalchemy import create_engine
-from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.orm import scoped_session
+from sqlalchemy.orm import sessionmaker
 
 
 class DBStorage:
