@@ -3,7 +3,6 @@
 import unittest
 import os
 from models.base_model import BaseModel
-import pep8
 
 
 class TestBaseModel(unittest.TestCase):
@@ -27,12 +26,6 @@ class TestBaseModel(unittest.TestCase):
             os.remove("file.json")
         except Exception:
             pass
-
-    def test_pep8_BaseModel(self):
-        """Testing for pep8"""
-        style = pep8.StyleGuide(quiet=True)
-        p = style.check_files(['models/base_model.py'])
-        self.assertEqual(p.total_errors, 0, "fix pep8")
 
     def test_checking_for_docstring_BaseModel(self):
         """checking for docstrings"""
