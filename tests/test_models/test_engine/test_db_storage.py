@@ -17,7 +17,7 @@ import os
 class TestDBStorage(unittest.TestCase):
     """Tests for SQLAlchemy storage method."""
 
-    db = MySQLdb.connect(host="localhost", user='hbnb_test',
+    db = MySQLdb.connect(host="127.0.0.1", user='hbnb_test',
                          passwd='hbnb_test_pwd', db='hbnb_test_db')
     cur = db.cursor()
     os.environ['HBNB_MYSQL_USER'] = 'hbnb_test'
