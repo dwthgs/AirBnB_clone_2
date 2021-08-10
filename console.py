@@ -2,7 +2,6 @@
 """This is the console for AirBnB"""
 import cmd
 import shlex
-import json
 import re
 from ast import literal_eval
 from models import storage
@@ -18,103 +17,52 @@ from shlex import split
 
 
 class HBNBCommand(cmd.Cmd):
-    """this class is entry point of the command interpreter
-    """
+    """this class is entry point of the command interpreter"""
     prompt = "(hbnb) "
     all_classes = {"BaseModel": BaseModel, "User": User, "State": State,
                    "City": City, "Amenity": Amenity, "Place": Place,
                    "Review": Review}
 
-    def emptyline(self):
+    def emptyargs(self):
         """Ignores empty spaces"""
         pass
 
-    def do_quit(self, line):
+    def do_quit(self, args):
         """Quit command to exit the program"""
         return True
 
-    def do_EOF(self, line):
+    def do_EOF(self, args):
         """Quit command to exit the program at end of file"""
         return True
 
-    def do_create(self, line):
-        """Creates a new instance of BaseModel, saves it
-        Exceptions:
-            SyntaxError: when there is no args given
-            NameError: when there is no object that has the name
-        """
-        try:
-            if not line:
-                raise SyntaxError()
-            # my_list = line.split(" ")
-            # if len(my_list) > 1:
-            #     cls = my_list.pop(0)
-            #     obj = eval("{}({})".format(cls, temp3))
-            # else:
-            #     obj = eval("{}()".format(my_list[0]))
+    def do_create(self, args):
+        """ Create an object of any class"""
+        if not args:
+            return print("** class name missing **")
 
-            # parser = shlex.shlex(line, posix=True)
-            # parser.whitespace_split = True
-            # token = " "
-            # arg_list = []
-            # tok_list = []
-            # cls = parser.get_token()
-            # while token is not None:
-            #     token = parser.get_token()
-            #     tok_list.append(token)
-            # del tok_list[-1]
-            # print(tok_list)
-            # for arg in tok_list:
-            #     arg_list.append(arg.split('=')[0])
-            # for arg in tok_list:
-            #     arg_list.append(arg.split('=')[1])
-            #     temp = literal_eval(arg_list[0])
+        data = args.split()
+        if data[0] not in self.all_classes:
+            return print("** class doesn't exist **")
+        new_instance = HBNBCommand.all_classes[data[0]]()
+        for item in data[1:]:
+            proval = item.split('=')
+            key = proval[0]
+            val = proval[1].replace('_', ' ')
 
-            parser = shlex.shlex(line, posix=True)
-            parser.whitespace_split = True
-            token = " "
-            tok_list = []
-            tup_list = []
-            to_parse = {}
-            sanitized_args = {}
-            cls = parser.get_token()
-            while token is not None:
-                token = parser.get_token()
-                tok_list.append(token)
-            for tup in tok_list:
-                if tup is not None:
-                    tup_list.append(tup.partition('='))
-            for tuple_item in tup_list:
-                to_parse[tuple_item[0]] = tuple_item[2]
-            for k, v in to_parse.items():
+            if '"' in val:
+                val = val.strip('"')
+            else:
+                try:
+                    val = eval(val)
+                except (SyntaxError, NameError):
+                    continue
 
-                # Matches string beginnig with 1 or more alphanum
-                # followed and ended by _id
-                if re.match("^\w+_id$", k):
-                    sanitized_args[k] = v
+            setattr(new_instance, key, val)
 
-                # Matches string that could be starting with + or -,
-                # followed by 1 to any amount of numbers
-                # followed by  a '.'
-                # followed by and anding with 1 to any amount of numbers
-                elif re.match("^[-+]?\d+\.\d+$", v):
-                    sanitized_args[k] = float(v)
-                elif v.isdigit() is True:
-                    sanitized_args[k] = int(v)
-                else:
-                    if '_' in v:
-                        sanitized_args[k] = v.replace('_', ' ')
-                    else:
-                        sanitized_args[k] = v
-            obj = HBNBCommand.all_classes[cls](**sanitized_args)
-            obj.save()
-            print("{}".format(obj.id))
-        except SyntaxError:
-            print("** class name missing **")
-        except KeyError:
-            print("** class doesn't exist **")
+        storage.save()
+        print("{}".format(new_instance))
 
-    def do_show(self, line):
+    def do_show(self, args):
         """Prints the string representation of an instance
         Exceptions:
             SyntaxError: when there is no args given
@@ -123,9 +71,9 @@ class HBNBCommand(cmd.Cmd):
             KeyError: when there is no valid id given
         """
         try:
-            if not line:
+            if not args:
                 raise SyntaxError()
-            my_list = line.split(" ")
+            my_list = args.split(" ")
             if my_list[0] not in self.all_classes:
                 raise NameError()
             if len(my_list) < 2:
@@ -145,7 +93,7 @@ class HBNBCommand(cmd.Cmd):
         except KeyError:
             print("** no instance found **")
 
-    def do_destroy(self, line):
+    def do_destroy(self, args):
         """Deletes an instance based on the class name and id
         Exceptions:
             SyntaxError: when there is no args given
@@ -154,9 +102,9 @@ class HBNBCommand(cmd.Cmd):
             KeyError: when there is no valid id given
         """
         try:
-            if not line:
+            if not args:
                 raise SyntaxError()
-            my_list = line.split(" ")
+            my_list = args.split(" ")
             if my_list[0] not in self.all_classes:
                 raise NameError()
             if len(my_list) < 2:
@@ -177,21 +125,21 @@ class HBNBCommand(cmd.Cmd):
         except KeyError:
             print("** no instance found **")
 
-    def do_all(self, line):
+    def do_all(self, args):
         """Prints all string representation of all instances
         Exceptions:
             NameError: when there is no object taht has the name
         """
 
         my_list = []
-        if not line:
+        if not args:
             objects = storage.all()
             for key in objects:
                 my_list.append(objects[key])
             print(my_list)
             return
         try:
-            args = line.split(" ")
+            args = args.split(" ")
             if args[0] not in self.all_classes:
                 raise NameError()
             objects = storage.all(args[0])
@@ -201,7 +149,7 @@ class HBNBCommand(cmd.Cmd):
         except NameError:
             print("** class doesn't exist **")
 
-    def do_update(self, line):
+    def do_update(self, args):
         """Updates an instanceby adding or updating attribute
         Exceptions:
             SyntaxError: when there is no args given
@@ -212,9 +160,9 @@ class HBNBCommand(cmd.Cmd):
             ValueError: when there is no value given
         """
         try:
-            if not line:
+            if not args:
                 raise SyntaxError()
-            my_list = split(line, " ")
+            my_list = split(args, " ")
             if my_list[0] not in self.all_classes:
                 raise NameError()
             if len(my_list) < 2:
@@ -246,12 +194,12 @@ class HBNBCommand(cmd.Cmd):
         except ValueError:
             print("** value missing **")
 
-    def count(self, line):
+    def count(self, args):
         """count the number of instances of a class
         """
         counter = 0
         try:
-            my_list = split(line, " ")
+            my_list = split(args, " ")
             if my_list[0] not in self.all_classes:
                 raise NameError()
             objects = storage.all()
@@ -286,11 +234,11 @@ class HBNBCommand(cmd.Cmd):
         new_list.append(" ".join(new_str.split(", ")))
         return " ".join(i for i in new_list)
 
-    def default(self, line):
+    def default(self, args):
         """retrieve all instances of a class and
         retrieve the number of instances
         """
-        my_list = line.split('.')
+        my_list = args.split('.')
         if len(my_list) >= 2:
             if my_list[1] == "all()":
                 self.do_all(my_list[0])
@@ -310,7 +258,7 @@ class HBNBCommand(cmd.Cmd):
                 else:
                     self.do_update(args)
         else:
-            cmd.Cmd.default(self, line)
+            cmd.Cmd.default(self, args)
 
 
 if __name__ == '__main__':
