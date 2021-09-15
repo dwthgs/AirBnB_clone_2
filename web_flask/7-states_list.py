@@ -1,24 +1,32 @@
 #!/usr/bin/python3
-''' starts a Flask web application  '''
-from models import *
+"""Starts a Flask web application.
+
+The application listens on 0.0.0.0, port 5000.
+Routes:
+    /states_list: HTML page with a list of all State objects in DBStorage.
+"""
 from models import storage
-from flask import Flask, render_template
+from flask import Flask
+from flask import render_template
+
 app = Flask(__name__)
 
 
-@app.route('/states_list', strict_slashes=False)
+@app.route("/states_list", strict_slashes=False)
 def states_list():
-    '''
-        Displays States list HTML page
-    '''
-    states = sorted(list(storage.all('State').values()), key=lamda x: x.name)
-    return render_template('7-states_list.html', states=states)
+    """Displays an HTML page with a list of all State objects in DBStorage.
+
+    States are sorted by name.
+    """
+    states = storage.all("State")
+    return render_template("7-states_list.html", states=states)
 
 
 @app.teardown_appcontext
-def teardown_db(exception):
+def teardown(exc):
+    """Remove the current SQLAlchemy session."""
     storage.close()
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(host="0.0.0.0")
